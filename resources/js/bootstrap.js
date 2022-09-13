@@ -15,9 +15,33 @@ try {
     require('bootstrap');
     require('select2');
 
-    $('select').select2({
-        theme: 'bootstrap4',
-    })
+    // $('select').select2({
+    //     theme: 'bootstrap4',
+    // })
+    // var APP_URL = $('meta[name="_base_url"]').attr('content');
+    // var APP_URL = window.location.origin + '/' + window.location.pathname.split ('/') [1];
+    var APP_URL = window.location.origin;
+    console.log(APP_URL)
+
+    $('.js-example-basic-single').select2({
+        placeholder: 'Select an item',
+        ajax: {
+        url: APP_URL+'/select2-autocomplete-ajax',
+        dataType: 'json',
+        delay: 250,
+        processResults: function (data) {
+            return {
+            results:  $.map(data, function (item) {
+                    return {
+                        text: item.variant,
+                        id: item.max_id
+                    }
+                })
+            };
+        },
+        cache: true
+        }
+    });
 
 } catch (e) {
 }

@@ -8,15 +8,17 @@
 
 
     <div class="card">
-        <form action="" method="get" class="card-header">
+        <form action="{{ route('search_product') }}" method="post" class="card-header">
+            @csrf
             <div class="form-row justify-content-between">
                 <div class="col-md-2">
                     <input type="text" name="title" placeholder="Product Title" class="form-control">
                 </div>
                 <div class="col-md-2">
-                    <select name="variant" id="" class="form-control">
+                    <!-- <select name="variant" id="" class="form-control js-example-basic-single">
 
-                    </select>
+                    </select> -->
+                    <select class="form-control js-example-basic-single" name="variant"></select>
                 </div>
 
                 <div class="col-md-3">
@@ -51,32 +53,65 @@
                     </thead>
 
                     <tbody>
-
+                    @php $i=1; @endphp
+                    @foreach($products as $product)
                     <tr>
-                        <td>1</td>
-                        <td>T-Shirt <br> Created at : 25-Aug-2020</td>
-                        <td>Quality product in low cost</td>
+                        <td>{{ $i }}</td>
+                        <td>{{ $product->title }} <br> Created at : {{ date_format($product->created_at,"d-M-Y") }}</td>
+                        <td>{{ Str::limit($product->description, 20) }}</td>
                         <td>
+                            @php $j=1; @endphp
+                            @foreach($product->product_variant_price as $product_variant_price_data)
+                            @php if($j==4){break;} @endphp
                             <dl class="row mb-0" style="height: 80px; overflow: hidden" id="variant">
 
                                 <dt class="col-sm-3 pb-0">
-                                    SM/ Red/ V-Nick
+                                    @php
+                                    $product_variant_one_value = "";
+                                    $product_variant_two_value = "";
+                                    $product_variant_three_value = "";
+                                    @endphp
+                                    @foreach($product->product_variant as $product_variant_data)
+                                        @if($product_variant_price_data->product_variant_one == $product_variant_data->id)
+                                        @php
+                                            $product_variant_one_value = $product_variant_data->variant;
+                                        @endphp
+                                        @endif
+                                        
+                                        @if($product_variant_price_data->product_variant_two == $product_variant_data->id)
+                                        @php
+                                            $product_variant_two_value = $product_variant_data->variant;
+                                        @endphp
+                                        @endif
+
+                                        @if($product_variant_price_data->product_variant_three == $product_variant_data->id)
+                                        @php
+                                            $product_variant_three_value = $product_variant_data->variant;
+                                        @endphp
+                                        @endif
+                                    @endforeach
+
+                                    {{ $product_variant_one_value }}/ {{ $product_variant_two_value }}/ {{ $product_variant_three_value }}
                                 </dt>
                                 <dd class="col-sm-9">
                                     <dl class="row mb-0">
-                                        <dt class="col-sm-4 pb-0">Price : {{ number_format(200,2) }}</dt>
-                                        <dd class="col-sm-8 pb-0">InStock : {{ number_format(50,2) }}</dd>
+                                        <dt class="col-sm-4 pb-0">Price : {{ number_format($product_variant_price_data->price,2) }}</dt>
+                                        <dd class="col-sm-8 pb-0">InStock : {{ number_format($product_variant_price_data->stock,2) }}</dd>
                                     </dl>
                                 </dd>
                             </dl>
+                            @php $j++; @endphp
+                            @endforeach
                             <button onclick="$('#variant').toggleClass('h-auto')" class="btn btn-sm btn-link">Show more</button>
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ route('product.edit', 1) }}" class="btn btn-success">Edit</a>
+                                <a href="{{ route('product.edit', $product->id) }}" class="btn btn-success">Edit</a>
                             </div>
                         </td>
                     </tr>
+                    @php $i++; @endphp
+                    @endforeach
 
                     </tbody>
 
@@ -96,5 +131,34 @@
             </div>
         </div>
     </div>
+
+    <script type="text/javascript">
+
+    // // var APP_URL = $('meta[name="_base_url"]').attr('content');
+    // var APP_URL = {!! json_encode(url('/')) !!}
+
+    // $('.js-example-basic-single').select2({
+    //     placeholder: 'Select an item',
+    //     ajax: {
+    //     url: APP_URL+'/select2-autocomplete-ajax',
+    //     dataType: 'json',
+    //     delay: 250,
+    //     processResults: function (data) {
+    //         return {
+    //         results:  $.map(data, function (item) {
+    //                 return {
+    //                     text: item.variant,
+    //                     id: item.id
+    //                 }
+    //             })
+    //         };
+    //     },
+    //     cache: true
+    //     }
+    // });
+
+
+    </script>
+
 
 @endsection

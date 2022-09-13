@@ -91,7 +91,7 @@
             </div>
         </div>
 
-        <button @click="saveProduct" type="submit" class="btn btn-lg btn-primary">Save</button>
+        <button @click="updateProduct" type="submit" class="btn btn-lg btn-primary">Save</button>
         <button type="button" class="btn btn-secondary btn-lg">Cancel</button>
     </section>
 </template>
@@ -110,13 +110,18 @@ export default {
         variants: {
             type: Array,
             required: true
-        }
+        },
+        data:{},
+        product_variant_data:{},
+        product_variant_price_data:{},
+        product_image_data:{},
     },
     data() {
         return {
-            product_name: '',
-            product_sku: '',
-            description: '',
+            product_id: this.data.id,
+            product_name: this.data.title,
+            product_sku: this.data.sku,
+            description: this.data.description,
             images: [],
             product_variant: [
                 {
@@ -182,7 +187,7 @@ export default {
         },
 
         // store product into database
-        saveProduct() {
+        updateProduct() {
             let product = {
                 title: this.product_name,
                 sku: this.product_sku,
@@ -193,10 +198,10 @@ export default {
             }
 
 
-            axios.post('/product', product).then(response => {
+            axios.put('/product/'+this.product_id, product).then(response => {
                 console.log(response.data);
                 if(response.data.success == "ok"){
-                    alert("New product created")
+                    alert("Product updated successfully")
                 }
             }).catch(error => {
                 console.log(error);
@@ -208,7 +213,76 @@ export default {
 
     },
     mounted() {
+        // console.log(this.product_variant_price_data);
         console.log('Component mounted.')
+        let all_variants = this.variants.map(el => el.id)
+        let selected_variants = this.product_variant.map(el => el.option);
+        let available_variants = all_variants.filter(entry1 => !selected_variants.some(entry2 => entry1 == entry2))
+        // console.log(all_variants)
+
+        this.product_variant = []
+        // all_variants.forEach((value, index) => {
+        //     let tag_name = 'tags_' + value
+        //     console.log(tag_name)
+        // })
+        let variantsss = all_variants.filter((variant_val)=>{
+            let tags = [];
+            // let variants_in_this_product = []
+            this.product_variant_data.forEach((product_variant_info, index) => {
+                // product_variant_info.variant_id
+                if(product_variant_info.variant_id == variant_val){
+                    tags.push(product_variant_info.variant);
+                }
+            })
+            if(tags.length != 0){
+                this.product_variant.push({
+                    option: variant_val,
+                    tags: tags
+                })
+            }
+            console.log(tags);
+        })
+        // console.log(tags);
+        this.product_variant_price_data.forEach((product_variant_price_info, index) => {
+            let item1 = "";
+            let item2 = "";
+            let item3 = "";
+            let item = "";
+            this.product_variant_data.forEach((product_variant_info, index) => {
+                if(product_variant_info.id == product_variant_price_info.product_variant_one){
+                    item1 = product_variant_info.variant;
+                }
+                if(product_variant_info.id == product_variant_price_info.product_variant_two){
+                    item2 = product_variant_info.variant;
+                }
+                if(product_variant_info.id == product_variant_price_info.product_variant_three){
+                    item3 = product_variant_info.variant;
+                }
+            })
+            if(item1){
+                item += item1+'/'; 
+            }
+            if(item2){
+                item += item2+'/'; 
+            }
+            if(item3){
+                item += item3; 
+            }
+            this.product_variant_prices.push({
+                title: item,
+                price: product_variant_price_info.price,
+                stock: product_variant_price_info.stock
+            })
+            
+            // console.log(product_variant_price_info.product_variant_one);
+        })
+        this.product_image_data.forEach((product_image_info, index) => {
+            console.log(product_image_info)
+            var file = { size: 123, name: "Icon", type: "image/png" };
+            var url = "http://127.0.0.1:8000/images/"+product_image_info.file_path;
+            this.$refs.myVueDropzone.manuallyAddFile(file, url);
+        })
+        
     }
 }
 </script>
